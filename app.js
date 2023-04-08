@@ -1,8 +1,12 @@
 const express = require('express');
+const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
+
+app.use(cors())
+app.use(express.json())
 
 
 const port = process.env.PORT || 5000
@@ -24,7 +28,17 @@ async function run() {
 
 
         app.get('/foods', async (req, res) => {
-            const query = {};
+            const search = req.query.search
+            let query = {};
+            if (query.length) {
+                query = {
+                    $text: {
+                        $search: search
+
+                    }
+                }
+            }
+
             const cursor = await foodCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
